@@ -3,6 +3,7 @@ package configs
 import (
 	"context"
 	"fmt"
+	"gin-api-template/tests"
 	"log"
 	"time"
 
@@ -11,6 +12,11 @@ import (
 )
 
 func ConnectDB() *mongo.Client {
+	if tests.AreRunning() {
+		fmt.Println("DB connection skipped")
+		return nil
+	}
+
 	client, err := mongo.NewClient(options.Client().ApplyURI(EnvMongoURI()))
 	if err != nil {
 		log.Fatal(err)
@@ -33,5 +39,8 @@ func ConnectDB() *mongo.Client {
 var DB *mongo.Client = ConnectDB()
 
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	if client == nil {
+		return nil
+	}
 	return client.Database("gin-api-template").Collection(collectionName)
 }
